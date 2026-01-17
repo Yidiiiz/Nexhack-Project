@@ -44,6 +44,13 @@ async function loadVideoFile(url) {
     apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
     apiKey: '',
     prompt: 'Tell me if there is a collision.',
+    model: 'OpenGVLab/InternVL3_5-30B-A3B',
+    processing: {
+      clip_length_seconds: 1,
+      delay_seconds: .2,
+      fps: 30,
+      sampling_ratio: 0.1
+    },
     source: { type: 'video', file: video },
     onResult: (result) => {
       const elapsed = Date.now() - startTime;
