@@ -1,4 +1,21 @@
 import { RealtimeVision } from '@overshoot/sdk'
+
+let vision = null;
+let videoDuration = 0;
+
+// Get video duration from a File object
+function getVideoDuration(file) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src);
+      resolve(video.duration * 1000); // Convert to milliseconds
+    };
+    video.src = URL.createObjectURL(file);
+  });
+}
+
 // Use a video file instead (e.g. from an <input type="file">)
 async function loadVideoFile(url) {
   const res = await fetch(url);
@@ -9,20 +26,44 @@ async function loadVideoFile(url) {
 
 (async () => {
   const video = await loadVideoFile("/videos/videoplayback.mp4");
-  const visionFromFile = new RealtimeVision({
+  
+  // Get video duration
+  videoDuration = await getVideoDuration(video);
+  console.log(`Video duration: ${(videoDuration / 1000).toFixed(1)} seconds`);
+
+  vision = new RealtimeVision({
     apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
-    apiKey: '',
-    prompt: 'Describe what you see',
+    apiKey: 'ovs_92ca80c5d500be12729bbb47e3da786a',
+    prompt: 'Tell me when there is a collision.',
     source: { type: 'video', file: video },
     onResult: (result) => {
-      console.log(result.result)                    // the AI's response
-      console.log(result.inference_latency_ms)      // model time (ms)
-      console.log(result.total_latency_ms)          // end-to-end time (ms)
+      console.log(result.result);  // AI response
+      console.log(`Inference: ${result.inference_latency_ms}ms | Total: ${result.total_latency_ms}ms`);
+    },
+    onEnd: async () => {
+      console.log('Video ended - stopping vision');
+      await vision.stop();
     }
   })
 
-  await visionFromFile.start();
+  await vision.start();
+
+  // Auto-stop after video duration
+  setTimeout(async () => {
+    if (vision) {
+      console.log('Video duration reached - stopping vision');
+      await vision.stop();
+    }
+  }, videoDuration);
 })();
+
+// Stop button handler
+document.getElementById('stopBtn').addEventListener('click', async () => {
+  if (vision) {
+    await vision.stop();
+    console.log('Vision stopped');
+  }
+});
 
 // Change what the AI looks for mid-stream
 // visionFromFile.updatePrompt('Count the number of people');
