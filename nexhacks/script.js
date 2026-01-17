@@ -6,7 +6,7 @@ let startTime = null;
 
 // Format milliseconds to mm:ss
 function formatTimestamp(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
+  const totalSeconds = Math.floor(ms / 1000) - 1;
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -42,7 +42,7 @@ async function loadVideoFile(url) {
 
   vision = new RealtimeVision({
     apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
-    apiKey: 'ovs_92ca80c5d500be12729bbb47e3da786a',
+    apiKey: '',
     prompt: 'Tell me if there is a collision.',
     source: { type: 'video', file: video },
     onResult: (result) => {
