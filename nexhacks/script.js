@@ -2,6 +2,15 @@ import { RealtimeVision } from '@overshoot/sdk'
 
 let vision = null;
 let videoDuration = 0;
+let startTime = null;
+
+// Format milliseconds to mm:ss
+function formatTimestamp(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
 
 // Get video duration from a File object
 function getVideoDuration(file) {
@@ -34,10 +43,12 @@ async function loadVideoFile(url) {
   vision = new RealtimeVision({
     apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
     apiKey: 'ovs_92ca80c5d500be12729bbb47e3da786a',
-    prompt: 'Tell me when there is a collision.',
+    prompt: 'Tell me if there is a collision.',
     source: { type: 'video', file: video },
     onResult: (result) => {
-      console.log(result.result);  // AI response
+      const elapsed = Date.now() - startTime;
+      const timestamp = formatTimestamp(elapsed);
+      console.log(`[${timestamp}] ${result.result}`);  // timestamp + AI response
       console.log(`Inference: ${result.inference_latency_ms}ms | Total: ${result.total_latency_ms}ms`);
     },
     onEnd: async () => {
@@ -46,6 +57,7 @@ async function loadVideoFile(url) {
     }
   })
 
+  startTime = Date.now();
   await vision.start();
 
   // Auto-stop after video duration
