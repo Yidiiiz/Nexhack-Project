@@ -42,7 +42,7 @@ async function loadVideoFile(url) {
 
   vision = new RealtimeVision({
     apiUrl: 'https://cluster1.overshoot.ai/api/v0.2',
-    apiKey: 'ovs_92ca80c5d500be12729bbb47e3da786a',
+    apiKey: '',
     prompt: 'Tell me if there is a collision.',
     source: { type: 'video', file: video },
     onResult: (result) => {
